@@ -341,6 +341,57 @@ function restoreValues(){$$('[data-store-key]').forEach(el=>{const v=state.value
 document.addEventListener('input',e=>{const el=e.target;if(!(el instanceof HTMLInputElement||el instanceof HTMLTextAreaElement||el instanceof HTMLSelectElement))return;const k=el.dataset.storeKey||el.dataset.save;if(!k)return;state.values[k]=el.type==='checkbox'?el.checked:el.value;save()});
 document.addEventListener('change',e=>{const el=e.target;if(!(el instanceof HTMLInputElement||el instanceof HTMLTextAreaElement||el instanceof HTMLSelectElement))return;const k=el.dataset.storeKey||el.dataset.save;if(!k)return;state.values[k]=el.type==='checkbox'?el.checked:el.value;save()});
 
+
+// Mix answer positions once per student so the correct option is not predictably first.
+// The order is saved locally and changes only after “New student”.
+function stableAnswerOrder(key,count){
+  state.random.answerOrders ||= {};
+  const saved=state.random.answerOrders[key];
+  if(Array.isArray(saved)&&saved.length===count&&saved.every((n,i,a)=>Number.isInteger(n)&&n>=0&&n<count&&a.indexOf(n)===i))return saved;
+  const arr=Array.from({length:count},(_,i)=>i);
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+  state.random.answerOrders[key]=arr; save(); return arr;
+}
+function mixSelectOptions(root=document){
+  $$('select[data-answer]',root).forEach((sel,idx)=>{
+    if(sel.dataset.mixed==='1')return;
+    const options=[...sel.options],fixed=options.filter(o=>!String(o.value).trim()),movable=options.filter(o=>String(o.value).trim());
+    if(movable.length<2){sel.dataset.mixed='1';return}
+    const key='select:'+((sel.dataset.save||sel.dataset.storeKey||sel.id||sel.closest('[data-task-id]')?.dataset.taskId||'q')+':'+idx);
+    const order=stableAnswerOrder(key,movable.length),chosen=sel.value;
+    movable.forEach(o=>o.remove());
+    order.forEach(i=>sel.appendChild(movable[i]));
+    fixed.forEach(o=>sel.insertBefore(o,sel.firstChild));
+    sel.value=chosen; sel.dataset.mixed='1';
+  });
+}
+function mixRadioChoices(root=document){
+  // Fieldset-style multiple choice.
+  $$('fieldset[data-correct]',root).forEach((fs,idx)=>{
+    if(fs.dataset.mixed==='1')return;
+    const labels=$$('label',fs).filter(l=>l.querySelector('input[type="radio"]'));
+    if(labels.length<2){fs.dataset.mixed='1';return}
+    const key='radiofieldset:'+((fs.closest('[data-task-id]')?.dataset.taskId||'mc')+':'+idx);
+    const order=stableAnswerOrder(key,labels.length); const anchor=labels[0];
+    order.forEach(i=>fs.appendChild(labels[i])); fs.dataset.mixed='1';
+  });
+  // Stand-alone radio groups such as the reading-title task.
+  const groups={};
+  $$('input[type="radio"][name]',root).forEach(inp=>{
+    if(inp.closest('fieldset[data-correct]'))return;
+    const label=inp.closest('label'); if(!label)return;
+    (groups[inp.name]||=[]).push(label);
+  });
+  Object.entries(groups).forEach(([name,labels])=>{
+    const parent=labels[0]?.parentElement;if(!parent||parent.dataset['mixed'+name])return;
+    if(labels.length<2)return;
+    const task=labels[0].closest('[data-task-id]')?.dataset.taskId||'radio';
+    const order=stableAnswerOrder('radiogroup:'+task+':'+name,labels.length);
+    order.forEach(i=>parent.appendChild(labels[i])); parent.dataset['mixed'+name]='1';
+  });
+}
+function mixAllAnswers(root=document){mixSelectOptions(root);mixRadioChoices(root)}
+
 // Navigation
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.go;const target=$('#'+id);if(target){target.scrollIntoView({behavior:'smooth',block:'start'});$('#map-modal').hidden=true}}));
 $$('[data-open="map"]').forEach(b=>b.addEventListener('click',()=>{$('#map-modal').hidden=false;$('#map-modal .modal-close').focus()}));
@@ -388,9 +439,9 @@ function renderFlash(){const [w,d]=vocab[flashIndex];$('#flash-front').textConte
 $('#flash-flip').onclick=()=>{flipped=!flipped;renderFlash()};$('#flashcard').onclick=()=>{flipped=!flipped;renderFlash()};$('#flash-prev').onclick=()=>{flashIndex=(flashIndex-1+vocab.length)%vocab.length;flipped=false;renderFlash()};$('#flash-next').onclick=()=>{flashIndex=(flashIndex+1)%vocab.length;flipped=false;renderFlash()};
 $$('[data-lab-tab]').forEach(b=>b.onclick=()=>{$$('[data-lab-tab]').forEach(x=>x.classList.toggle('active',x===b));$$('[data-lab-panel]').forEach(p=>p.classList.toggle('active',p.dataset.labPanel===b.dataset.labTab))});
 function sample(n){return [...vocab].sort(()=>Math.random()-.5).slice(0,n)}
-function initLexiMatch(reset=false){if(reset||!state.random.lexiMatch)state.random.lexiMatch=sample(6).map(x=>x[0]);const words=state.random.lexiMatch.map(w=>vocab.find(v=>v[0]===w));const defs=[...words.map(x=>x[1])].sort(()=>Math.random()-.5);$('#lexi-match').innerHTML=words.map(([w,d],i)=>`<div class="match-item"><b>${w}</b><select data-answer="${d.replace(/"/g,'&quot;')}" data-save="lexiMatch:${i}"><option value="">Choose definition</option>${defs.map(x=>`<option>${x}</option>`).join('')}</select></div>`).join('');assignKeys();restoreValues();save()}
+function initLexiMatch(reset=false){if(reset||!state.random.lexiMatch)state.random.lexiMatch=sample(6).map(x=>x[0]);const words=state.random.lexiMatch.map(w=>vocab.find(v=>v[0]===w));const defs=[...words.map(x=>x[1])].sort(()=>Math.random()-.5);$('#lexi-match').innerHTML=words.map(([w,d],i)=>`<div class="match-item"><b>${w}</b><select data-answer="${d.replace(/"/g,'&quot;')}" data-save="lexiMatch:${i}"><option value="">Choose definition</option>${defs.map(x=>`<option>${x}</option>`).join('')}</select></div>`).join('');assignKeys();restoreValues();mixSelectOptions($('#lexi-match'));save()}
 function initLexiRecall(reset=false){if(reset||!state.random.lexiRecall)state.random.lexiRecall=sample(6).map(x=>x[0]);const words=state.random.lexiRecall.map(w=>vocab.find(v=>v[0]===w));$('#lexi-recall').innerHTML=words.map(([w,d],i)=>`<div class="recall-item"><div><b>${d}</b><small>First letter: ${w[0].toUpperCase()}</small></div><input data-answer="${w}" data-save="lexiRecall:${i}" aria-label="Vocabulary recall ${i+1}"></div>`).join('');assignKeys();restoreValues();save()}
-function initLexiUse(){const qs=[['Your mother’s sister is your…','aunt',['aunt','niece','cousin']],['You have no brothers or sisters. You are an…','only child',['only child','relative','twin']],['Your grandparents and cousins are part of your…','extended family',['immediate family','extended family','one-parent family']],['You ask before posting a photo because you need…','permission',['permission','embarrassment','difference']],['You change who can see a post in your…','privacy settings',['privacy settings','family tree','confidence']],['Your sister’s son is your…','nephew',['nephew','uncle','son-in-law']]];$('#lexi-use').innerHTML=qs.map(([q,a,ops],i)=>`<label class="scenario"><p>${q}</p><select data-answer="${a}" data-save="lexiUse:${i}"><option value="">Choose</option>${ops.map(x=>`<option>${x}</option>`).join('')}</select></label>`).join('');assignKeys();restoreValues()}
+function initLexiUse(){const qs=[['Your mother’s sister is your…','aunt',['aunt','niece','cousin']],['You have no brothers or sisters. You are an…','only child',['only child','relative','twin']],['Your grandparents and cousins are part of your…','extended family',['immediate family','extended family','one-parent family']],['You ask before posting a photo because you need…','permission',['permission','embarrassment','difference']],['You change who can see a post in your…','privacy settings',['privacy settings','family tree','confidence']],['Your sister’s son is your…','nephew',['nephew','uncle','son-in-law']]];$('#lexi-use').innerHTML=qs.map(([q,a,ops],i)=>`<label class="scenario"><p>${q}</p><select data-answer="${a}" data-save="lexiUse:${i}"><option value="">Choose</option>${ops.map(x=>`<option>${x}</option>`).join('')}</select></label>`).join('');assignKeys();restoreValues();mixSelectOptions($('#lexi-use'))}
 function lexiComplete(part,ok){state.lexiParts[part]=ok;const count=Object.values(state.lexiParts).filter(Boolean).length;$('#lexi-score').textContent=count+'/3';if(state.lexiParts.match&&state.lexiParts.recall&&state.lexiParts.use)setDone('lexi',true);else setDone('lexi',false);save()}
 $('[data-check="lexiMatch"]').onclick=()=>{const card=$('[data-lab-panel="match"]'),fields=$$('[data-answer]',card);let ok=0;fields.forEach(x=>{const y=norm(x.value)===norm(x.dataset.answer);x.classList.toggle('correct',y);x.classList.toggle('wrong',!y);if(y)ok++});const all=ok===fields.length;fb('#feedback-lexiMatch',all?'good':'bad',all?'✓ All six matched.':`${ok}/${fields.length} correct.`);lexiComplete('match',all)};
 $('[data-check="lexiRecall"]').onclick=()=>{const card=$('[data-lab-panel="type"]'),fields=$$('[data-answer]',card);let ok=0;fields.forEach(x=>{const y=norm(x.value)===norm(x.dataset.answer);x.classList.toggle('correct',y);x.classList.toggle('wrong',!y);if(y)ok++});const all=ok===fields.length;fb('#feedback-lexiRecall',all?'good':'bad',all?'✓ Full recall — no word bank needed.':`${ok}/${fields.length} correct. Use the first-letter clues and try again.`);lexiComplete('recall',all)};
@@ -414,7 +465,7 @@ $('#complete-final').onclick=()=>{const checks=$$('[data-final-check]'),checked=
 const sections=$$('.chapter, .hero');const observer=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;$$('.rail-item').forEach(b=>b.classList.toggle('active',b.dataset.go===visible.target.id))},{rootMargin:'-20% 0px -60% 0px',threshold:[0,.15,.4]});sections.forEach(s=>observer.observe(s));
 
 // Init
-assignKeys();restoreValues();initStages(false);initFamily(false);initMarkers(false);initLexiMatch(false);initLexiRecall(false);initLexiUse();renderFlash();$('#lexi-score').textContent=Object.values(state.lexiParts).filter(Boolean).length+'/3';document.body.classList.toggle('teacher-mode',state.teacher);$('#teacher-drawer').classList.toggle('open',state.teacher);$('#teacher-drawer').setAttribute('aria-hidden',String(!state.teacher));$('#teacher-toggle').setAttribute('aria-pressed',String(state.teacher));updateProgress();
+assignKeys();restoreValues();initStages(false);initFamily(false);initMarkers(false);initLexiMatch(false);initLexiRecall(false);initLexiUse();mixAllAnswers();renderFlash();$('#lexi-score').textContent=Object.values(state.lexiParts).filter(Boolean).length+'/3';document.body.classList.toggle('teacher-mode',state.teacher);$('#teacher-drawer').classList.toggle('open',state.teacher);$('#teacher-drawer').setAttribute('aria-hidden',String(!state.teacher));$('#teacher-toggle').setAttribute('aria-pressed',String(state.teacher));updateProgress();
 
 // save final checkboxes + radios as session persistence where helpful
 $$('[data-final-check]').forEach((el,i)=>{const k='finalcheck:'+i;if(state.values[k])el.checked=true;el.addEventListener('change',()=>{state.values[k]=el.checked;save()})});
