@@ -1,0 +1,72 @@
+name: Finalize Unit 1 content
+on:
+  push:
+    paths:
+      - '.github/workflows/finalize-unit1.yml'
+permissions:
+  contents: write
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply content and answer-key QA corrections
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          replacements = []
+          replacements.append((
+            "choices(['wears','wearing','carries','carrying'],2)",
+            "choices(['wears','wearing','carries','carrying'],1)"
+          ))
+
+          replacements.append((
+            "${input('I ___ homework in the library. (do)','am doing|\\'m doing')}${input('I normally ___ here on Tuesday evenings. (come)','come')}",
+            "${input('I ___ homework in the library. (do)','am doing|\\'m doing')}${input('Why ___ you ___ there? (study)','are studying|are you studying')}${input('I normally ___ here on Tuesday evenings. (come)','come')}"
+          ))
+
+          old_listen = "const listeningScript=`Oliver likes that his parents give him quite a lot of independence. Emma argues with her sister, but her mum protects the sister because she is only ten. Harry says his dad is the headmaster at his school and is never satisfied with what he does after school. Charlotte says her mum is a doctor and they disagree about a free-time activity because Charlotte wants to make her own decisions. Poppy admits she sometimes does something wrong, but says teenagers and parents often see things differently.`;"
+          new_listen = "const listeningScript=`Oliver likes that his parents give him quite a lot of independence, although he sometimes argues with a parent about a free-time activity. Emma argues with her sister, but her mum protects the sister because she is only ten. Harry says his dad is the headmaster at his school and is never satisfied with what he does after school. Charlotte says her mum is a doctor; they sometimes argue because Charlotte wants to make more independent decisions. Poppy admits she sometimes does something wrong but thinks it is not very important, and says teenagers and parents often see things differently.`;"
+          replacements.append((old_listen, new_listen))
+
+          old_a1_tail = "${choices([\"My mum’s a doctor. → profession\",\"My mum’s a doctor. → unique thing\"],0)}`,'General plural = no article; profession = a/an.');"
+          new_a1_tail = "${choices([\"My mum’s a doctor. → profession\",\"My mum’s a doctor. → unique thing\"],0)}<p class=\"inst\">Now compare the five rules with your own language. Which are similar and which are different?</p><textarea class=\"answer\" rows=\"3\" data-open=\"1\"></textarea>`,'General plural = no article; profession = a/an.');"
+          replacements.append((old_a1_tail, new_a1_tail))
+
+          old_a5 = "g2+=task('a5','5 · Complete the personal questions',`<div class=\"fields\">${input('Do you think ___ family dinners are a good idea?','—|-')}${input('Do you talk about ___ important things when you eat?','—|-')}${input('Are ___ family dinners ___ important part of life in your country?','—, an|-, an')}${input('Is there ___ video game your family enjoys?','a')}${input('Is it important to like ___ same things as your parents?','the')}${input('Do you have ___ arguments about technology?','—|-')}</div><p class=\"inst\">Interview your tutor using the questions.</p>`,'General plural often takes no article.');"
+          new_a5 = "g2+=task('a5','5 · Complete the personal questions',`<div class=\"fields\">${input('1 Do you think ___ family dinners are a good idea?','—|-')}${input('2a Do you talk about ___ important things…?','—|-')}${input('2b …when you have ___ dinner?','a')}${input('3 Are ___ family dinners ___ important part of life in your country?','—, an|-, an')}${input('4 Is it important to do ___ activities together with your family?','—|-')}${input('5 Is there ___ video game your family enjoys playing together?','a')}${input('6 Is it important to like ___ same things as your parents?','the')}${input('7 Do you ever have ___ arguments with your family about technology?','—|-')}</div><p class=\"inst\">Interview your tutor using all seven questions.</p>`,'General plural often takes no article; dinner as one meal takes a.');"
+          replacements.append((old_a5, new_a5))
+
+          old_a6 = "g2+=task('a6','6 · Understanding your parents · explain the articles',`<p>Explain why each highlighted article/no article is used in this summary: <i>Dean Burnett is <b>a</b> doctor of neuroscience. He is <b>the</b> author of <b>a</b> new book. He wrote <b>the</b> book to help <b>—</b> teenagers. He says <b>—</b> problems in <b>the</b> relationship between <b>—</b> youngsters and <b>—</b> adults are nothing new. <b>The</b> ancient Greek philosopher Socrates talked about them. <b>The</b> key is to realise your brain works differently when you are <b>a</b> teenager and <b>an</b> adult.</i></p><textarea class=\"answer\" rows=\"6\"></textarea>`,'',true);"
+          new_a6 = "g2+=task('a6','6 · Understanding your parents · explain the articles',`<p>Using rules 1–5, explain every highlighted article or no article: <i>Dean Burnett is <b>(a) a</b> doctor of neuroscience. He is <b>(b) the</b> author of <b>(c) a</b> new book. He wrote <b>(d) the</b> book to help <b>(e) —</b> teenagers. There are lots of books for <b>(f) —</b> parents about this question, but not many written for <b>(g) —</b> young people. He says that <b>(h) —</b> problems in <b>(i) the</b> relationship between <b>(j) —</b> youngsters and <b>(k) —</b> adults are nothing new. <b>(l) The</b> ancient Greek philosopher Socrates talked about them 2500 years ago. Dean thinks <b>(m) the</b> key is to realise your brain works differently when you are <b>(n) a</b> teenager and <b>(o) an</b> adult.</i></p><textarea class=\"answer\" rows=\"7\"></textarea>`,'',true);"
+          replacements.append((old_a6, new_a6))
+
+          replacements.append((
+            "<div class=\"grid2\"><div class=\"photo pink\"><div><h3>Holly</h3><p>one brother · basketball · video games · biology</p></div></div><div class=\"photo\"><div><h3>Dylan</h3><p>one sister · school · weekends · sport</p></div></div></div>",
+            "<div class=\"grid2\"><div class=\"photo pink\"><div><h3>Holly</h3><p>one brother (20) at university · one sister (12) at school · plays basketball at the weekend · likes video games · favourite subject: biology</p></div></div><div class=\"photo\"><div><h3>Dylan</h3><p>one sister (14) at school · plays football at the weekend · likes sport · favourite subject: biology</p></div></div></div>"
+          ))
+
+          old_wr3 = "wr+=task('wr3','3 · Writing bank',`<div class=\"fields\">${input('Contraction example: ___ got','I\\'ve|I have')}${input('To change the subject: ___,','Anyway')}${input('That’s ___ for now.','all')}${input('Write ___ soon.','back')}${input('Best ___.','wishes')}</div><p>Informal emails can use contractions and friendly punctuation/emoticons when appropriate.</p>`,'Notice the opening, topic change and closing.');"
+          new_wr3 = "wr+=task('wr3','3 · Writing bank',`<div class=\"fields\">${input('A natural informal opening: ___ Maya, / ___,','Dear|Hi')}${input('Contraction example: ___ got','I\\'ve|I have')}${input('To change the subject: ___,','Anyway')}${input('That’s ___ for now.','all')}${input('Write ___ soon.','back')}${input('Best ___.','wishes')}</div><p>Informal emails can also use appropriate emoticons and contractions such as <b>I’m</b> and <b>I’ve</b>. Useful reply openers include <i>Thanks for your email</i>, <i>It was great to hear from you</i>, <i>How are things?</i> and <i>I hope you’re well</i>. Other natural closings include <i>Bye for now</i> and <i>All the best</i>.</p>`,'Notice the opening, contractions, topic change and closing.');"
+          replacements.append((old_wr3, new_wr3))
+
+          misses = []
+          for old, new in replacements:
+            if old not in s:
+              misses.append(old[:100])
+            else:
+              s = s.replace(old, new, 1)
+          if misses:
+            raise SystemExit('Missing expected fragments: ' + repr(misses))
+          p.write_text(s, encoding='utf-8')
+      - name: Commit corrections
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "QA Unit 1 answers and preserve remaining textbook prompts"
+          git push
