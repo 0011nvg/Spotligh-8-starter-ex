@@ -1,4 +1,62 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Autumn Holidays · A1+/A2</title><style>:root{--bg:#f7f1e6;--ink:#2f2925;--forest:#375b4a;--rust:#b65c36;--gold:#e9b968}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,sans-serif}header{position:sticky;top:0;background:var(--forest);color:white;padding:12px 5%;display:flex;gap:15px;align-items:center;flex-wrap:wrap;z-index:2}header a{color:white}main{max-width:1020px;margin:auto;padding:25px 16px 90px}.hero{background:var(--gold);border:3px solid var(--ink);border-radius:28px;padding:40px}h1{font-size:clamp(50px,9vw,104px);line-height:.94;letter-spacing:-.06em;margin:15px 0}h2{font-size:clamp(30px,5vw,48px);line-height:1.1}button,input,textarea{font:inherit}button{background:#fff;border:2px solid var(--ink);border-radius:13px;padding:10px 15px;cursor:pointer;min-height:44px}button:hover{background:var(--gold)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid var(--rust)}.nav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.nav button{font-weight:700}section{display:block;background:#fffdf8;border:2px solid var(--ink);border-radius:24px;padding:25px;min-height:480px}section{margin:18px 0;scroll-margin-top:75px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}.card{border:2px solid var(--ink);border-radius:15px;background:#f3e8d7;padding:18px}.card b{display:block}.emoji{font-size:42px}.task{background:#e8eee6;padding:18px;border-left:6px solid var(--forest);border-radius:10px;margin:18px 0}.choices{display:flex;gap:10px;flex-wrap:wrap}.choices button.sel{background:var(--gold)}textarea,input{width:100%;border:2px solid var(--ink);border-radius:12px;padding:12px;min-height:48px}textarea{min-height:130px}.feedback{font-weight:800;min-height:28px}.tutor{background:var(--forest);color:white;padding:18px;border-radius:16px;margin:18px 0}details{padding:12px;background:#f8edcf;border-radius:10px;margin:12px 0}summary{cursor:pointer;font-weight:700}.actions{display:flex;justify-content:space-between;gap:12px;margin-top:24px}a{color:var(--forest)}@media(max-width:600px){.hero{padding:24px}section{padding:18px}header{position:static}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}</style><body><header><a href="../">← Main site</a><b>🍂 AUTUMN HOLIDAYS</b><span id="count"></span><button onclick="reset()">New student / Reset all</button></header><main><div class="nav" id="nav"></div><div id="content"></div></main><script>
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Autumn Holidays · A1+/A2</title><style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{--bg:#F7F4ED;--ink:#211F25;--forest:#3D3BFF;--rust:#FF4FA3;--gold:#FFD400;--paper:#fffefa;--line:#292634}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 'DM Sans',system-ui,sans-serif;background-image:radial-gradient(#27223810 1px,transparent 1px);background-size:22px 22px}
+header{position:sticky;top:0;background:#211F25;color:#fff;padding:12px max(18px,calc((100vw - 1240px)/2));display:flex;gap:16px;align-items:center;flex-wrap:wrap;z-index:10;border-bottom:5px solid var(--gold);box-shadow:0 7px 0 #211f2514}
+header b{font-family:'Space Grotesk',sans-serif;font-size:clamp(17px,2.5vw,23px);font-weight:700;letter-spacing:-.05em;text-transform:uppercase}
+header a{color:#fff;text-decoration:none;border:1px solid #ffffff88;border-radius:100px;padding:5px 12px;font-size:13px;font-weight:800}
+header span{margin-left:auto;color:#fff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+header button{background:var(--gold);color:#16131a;border:2px solid #16131a;padding:8px 13px;font-size:12px;font-weight:900;min-height:40px}
+main{max-width:1200px;margin:auto;padding:25px 20px 100px}
+h1,h2,h3{font-family:'Space Grotesk','DM Sans',sans-serif;letter-spacing:-.055em}
+h2{font-size:clamp(34px,5.5vw,66px);line-height:1.03;max-width:850px;margin:12px 0 24px;text-wrap:balance}
+p{max-width:78ch}
+button,input,textarea{font:inherit}
+button{background:white;border:2px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;min-height:44px;color:var(--ink);font-weight:800;box-shadow:3px 3px 0 var(--line);transition:transform .15s,box-shadow .15s,background .15s}
+button:hover{background:var(--gold);transform:translate(-1px,-2px);box-shadow:5px 5px 0 var(--line)}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--line)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible{outline:4px solid #ff4fa3;outline-offset:3px}
+.nav{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px;padding:20px;background:var(--gold);border:2px solid var(--line);border-radius:18px;box-shadow:6px 6px 0 var(--line)}
+.nav:before{content:'YOUR PLAYLIST ↘';display:block;flex-basis:100%;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:clamp(20px,3vw,30px);letter-spacing:-.05em}
+.nav button{font-weight:800;background:#fffdf6;border-radius:100px;font-size:13px;box-shadow:2px 2px 0 var(--line)}
+.nav button[aria-current="step"]{background:var(--forest);color:white}
+section{display:block;background:var(--paper);border:2px solid var(--line);border-radius:26px;padding:clamp(22px,4vw,54px);min-height:0;margin:28px 0 40px;scroll-margin-top:115px;box-shadow:9px 9px 0 var(--line);position:relative;overflow:hidden}
+section:before{content:'AUTUMN HOLIDAYS / FIELD NOTES';display:block;font-size:11px;font-weight:900;letter-spacing:.16em;color:#555;max-width:70%;margin-bottom:22px}
+section:after{content:'✳';position:absolute;right:20px;top:4px;font-size:clamp(55px,10vw,100px);font-weight:900;color:var(--gold);line-height:1;transform:rotate(-12deg);pointer-events:none}
+section:nth-of-type(3n+1){border-top:12px solid var(--forest)}
+section:nth-of-type(3n+2){border-top:12px solid var(--rust)}
+section:nth-of-type(3n){border-top:12px solid var(--gold)}
+section>b:first-child{display:inline-block;background:#211f25;color:#fff;padding:5px 13px;border-radius:100px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;position:relative;z-index:1}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr));gap:16px;margin:22px 0}
+.card{border:2px solid var(--line);border-radius:18px;background:#FFF0C5;padding:22px;box-shadow:4px 4px 0 var(--line);min-width:0;position:relative;transition:transform .18s}
+.card:nth-child(4n+2){background:#EAE9FF}
+.card:nth-child(4n+3){background:#FFE0EE}
+.card:nth-child(4n){background:#DDF3E7}
+.card:hover{transform:rotate(-1deg) translateY(-3px)}
+.card b{display:block;font-family:'Space Grotesk',sans-serif;font-size:19px;line-height:1.25;margin:7px 0 12px;letter-spacing:-.035em}
+.card button{font-size:12px;min-height:40px;padding:7px 10px}
+.emoji{font-size:48px;display:block;line-height:1.2}
+.task{background:#F1F0FF;padding:clamp(16px,3vw,27px);border:2px solid var(--line);border-left:9px solid var(--forest);border-radius:17px;margin:24px 0;box-shadow:4px 4px 0 #211f2525}
+.task:nth-of-type(2n){background:#FFF3DB;border-left-color:var(--rust)}
+.task>b:first-child{font-family:'Space Grotesk',sans-serif;font-size:20px;letter-spacing:-.035em}
+.choices{display:flex;gap:11px;flex-wrap:wrap;margin:14px 0}
+.choices button{font-size:14px}
+.choices button.sel{background:var(--gold);box-shadow:inset 0 0 0 2px var(--line)}
+textarea,input{width:100%;border:2px solid var(--line);border-radius:12px;padding:14px;min-height:48px;background:#fff;color:var(--ink)}
+textarea{min-height:145px;resize:vertical}
+.feedback{font-weight:900;min-height:28px;color:#2b276d}
+.tutor{background:#211F25;color:#fff;padding:clamp(19px,3vw,30px);border-radius:19px;margin:24px 0;border:2px solid #211f25;box-shadow:6px 6px 0 var(--rust);font-size:16px}
+details{padding:14px 18px;background:#FFF1BF;border:2px dashed #343039;border-radius:13px;margin:16px 0}
+summary{cursor:pointer;font-weight:900}
+.actions{display:flex;justify-content:space-between;gap:12px;margin-top:30px;padding-top:20px;border-top:2px dashed #211f2530}
+.actions button:last-child{background:var(--gold)}
+a{color:#2521c7;font-weight:800}
+@media(max-width:680px){header{position:static;padding:12px 15px;gap:9px}header span{margin-left:0}main{padding:18px 14px 80px}.nav{padding:15px;gap:7px}.nav button{font-size:12px;padding:8px 10px}section{padding:22px 17px;margin:20px 0 30px;box-shadow:5px 5px 0 var(--line);scroll-margin-top:20px}section:after{opacity:.35}.cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}.card{padding:15px}.choices button{flex:1 1 130px}.actions button{font-size:13px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button,.card{transition:none}button:hover,.card:hover{transform:none}}
+</style><body><header><a href="../">← Main site</a><b>🍂 AUTUMN HOLIDAYS</b><span id="count"></span><button onclick="reset()">New student / Reset all</button></header><main><div class="nav" id="nav"></div><div id="content"></div></main><script>
 const words=[['🛍️','go shopping'],['🛹','go skateboarding'],['📚','read a graphic novel'],['☕','visit a café'],['🧁','bake cookies'],['🎳','go bowling'],['📷','take photos'],['🏀','play basketball'],['🧩','solve a mystery'],['🎤','sing karaoke'],['👫','hang out with friends'],['🍔','order takeaway'],['🎬','go to the cinema'],['🎮','play video games'],['🎃','carve a pumpkin'],['🚆','go on a day trip'],['👻','watch a horror film'],['🏡','visit relatives']];
 const tasks=[
 ['8 min','THE AUTUMN VIBE','Warm-up',`<p>Would you rather stay home or go out with friends during the holidays? Why?</p><div class="choices" data-pick="mood"><button>🍿 Movie night</button><button>🍔 Fast food trip</button><button>🎮 Gaming marathon</button><button>🎃 Halloween party</button></div><div class="task"><b>LANGUAGE DETECTIVE: AUTUMN / FALL / COLD</b><p><b>Autumn</b> is the season (common in British English). <b>Fall</b> means the same season (especially American English). <b>Cold</b> describes the temperature, not a season. It can be cold in autumn, winter or spring!</p><p>Choose the word that is NOT a season name.</p><div class="choices" data-correct="cold"><button>autumn</button><button>fall</button><button>cold</button></div><p class="feedback"></p><details><summary>Need a hint?</summary>One word describes temperature.</details><p><button onclick="say('Autumn and fall mean the same season. Cold describes the weather.')">🔊 Listen to the explanation</button></p><p><b>STUDENT TURN:</b> Is autumn cold where you live? What is your favourite season?</p></div><div class="tutor">STUDENT TURN: Explain your choice in two sentences. TUTOR FOLLOW-UP: What would make this day perfect?</div>`],
